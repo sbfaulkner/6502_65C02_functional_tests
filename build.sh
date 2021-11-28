@@ -4,11 +4,8 @@ set -euo pipefail
 build() {
   src=$1
   shift
-  base=${src%.*}
-  [ ! bin_files/${base}.bin -nt ${src} ] && (
-    as65 -v -l -m -w -h0 $@ ${src}
-    mv -f ${base}.{bin,lst} bin_files/
-  )
+  as65 -l -m -w -h0 $@ ${src}
+  mv -f ${src%.*}.{bin,lst} bin_files/
 }
 
 for src in *.a65; do
