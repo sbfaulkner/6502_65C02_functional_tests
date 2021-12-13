@@ -105,25 +105,25 @@ AS65 Assembler for R6502 [1.42].  Copyright 1994-2007, Frank A. Kingswood       
                                     bcs NEXT1
                                 endif
 0224 : 850d                     sta N1H
-0226 : 204a02                   jsr ADD
-0229 : 20ed02                   jsr A6502
-022c : 20c802                   jsr COMPARE
-022f : d018                     bne DONE
-0231 : 208e02                   jsr SUB
-0234 : 20f602                   jsr S6502
-0237 : 20c802                   jsr COMPARE
-                                ;bne DONE
-023a : e600             NEXT1   inc N1    ; [5] see text
-023c : d0dc                     bne LOOP2 ; loop through all 256 values of N1
-023e : e601             NEXT2   inc N2    ; [6] see text
-0240 : d0c8                     bne LOOP1 ; loop through all 256 values of N2
-0242 : 88                       dey
-0243 : 10c5                     bpl LOOP1 ; loop through both values of the carry flag
-0245 : a900                     lda #0    ; test passed, so store 0 in ERROR
-0247 : 850b                     sta ERROR
-0249 :                  DONE
+0226 : 204c02                   jsr ADD
+0229 : 20ef02                   jsr A6502
+022c : 20ca02                   jsr COMPARE
+022f : d01a                     bne DONE
+0231 : 209002                   jsr SUB
+0234 : 20f802                   jsr S6502
+0237 : 20ca02                   jsr COMPARE
+023a : d00f                     bne DONE
+023c : e600             NEXT1   inc N1    ; [5] see text
+023e : d0da                     bne LOOP2 ; loop through all 256 values of N1
+0240 : e601             NEXT2   inc N2    ; [6] see text
+0242 : d0c6                     bne LOOP1 ; loop through all 256 values of N2
+0244 : 88                       dey
+0245 : 10c3                     bpl LOOP1 ; loop through both values of the carry flag
+0247 : a900                     lda #0    ; test passed, so store 0 in ERROR
+0249 : 850b                     sta ERROR
+024b :                  DONE
                                 end_of_test
-0249 : db              >                db  $db     ;execute 65C02 stop instruction
+024b : db              >                db  $db     ;execute 65C02 stop instruction
                         
                         
                         ; Calculate the actual decimal mode accumulator and flags, the accumulator
@@ -131,78 +131,78 @@ AS65 Assembler for R6502 [1.42].  Copyright 1994-2007, Frank A. Kingswood       
                         ; predicted accumulator result, the predicted carry flag, and the predicted
                         ; V flag
                         ;
-024a : f8               ADD     sed       ; decimal mode
-024b : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
-024d : a500                     lda N1
-024f : 6501                     adc N2
-0251 : 8504                     sta DA    ; actual accumulator result in decimal mode
-0253 : 08                       php
-0254 : 68                       pla
-0255 : 8505                     sta DNVZC ; actual flags result in decimal mode
-0257 : d8                       cld       ; binary mode
-0258 : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
-025a : a500                     lda N1
-025c : 6501                     adc N2
-025e : 8502                     sta HA    ; accumulator result of N1+N2 using binary arithmetic
+024c : f8               ADD     sed       ; decimal mode
+024d : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+024f : a500                     lda N1
+0251 : 6501                     adc N2
+0253 : 8504                     sta DA    ; actual accumulator result in decimal mode
+0255 : 08                       php
+0256 : 68                       pla
+0257 : 8505                     sta DNVZC ; actual flags result in decimal mode
+0259 : d8                       cld       ; binary mode
+025a : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+025c : a500                     lda N1
+025e : 6501                     adc N2
+0260 : 8502                     sta HA    ; accumulator result of N1+N2 using binary arithmetic
                         
-0260 : 08                       php
-0261 : 68                       pla
-0262 : 8503                     sta HNVZC ; flags result of N1+N2 using binary arithmetic
-0264 : c001                     cpy #1
-0266 : a50c                     lda N1L
-0268 : 650e                     adc N2L
-026a : c90a                     cmp #$0A
-026c : a200                     ldx #0
-026e : 9006                     bcc A1
-0270 : e8                       inx
-0271 : 6905                     adc #5    ; add 6 (carry is set)
-0273 : 290f                     and #$0F
-0275 : 38                       sec
-0276 : 050d             A1      ora N1H
+0262 : 08                       php
+0263 : 68                       pla
+0264 : 8503                     sta HNVZC ; flags result of N1+N2 using binary arithmetic
+0266 : c001                     cpy #1
+0268 : a50c                     lda N1L
+026a : 650e                     adc N2L
+026c : c90a                     cmp #$0A
+026e : a200                     ldx #0
+0270 : 9006                     bcc A1
+0272 : e8                       inx
+0273 : 6905                     adc #5    ; add 6 (carry is set)
+0275 : 290f                     and #$0F
+0277 : 38                       sec
+0278 : 050d             A1      ora N1H
                         ;
                         ; if N1L + N2L <  $0A, then add N2 & $F0
                         ; if N1L + N2L >= $0A, then add (N2 & $F0) + $0F + 1 (carry is set)
                         ;
-0278 : 750f                     adc N2H,x
-027a : 08                       php
-027b : b004                     bcs A2
-027d : c9a0                     cmp #$A0
-027f : 9003                     bcc A3
-0281 : 695f             A2      adc #$5F  ; add $60 (carry is set)
-0283 : 38                       sec
-0284 : 8506             A3      sta AR    ; predicted accumulator result
-0286 : 08                       php
-0287 : 68                       pla
-0288 : 850a                     sta CF    ; predicted carry result
-028a : 68                       pla
+027a : 750f                     adc N2H,x
+027c : 08                       php
+027d : b004                     bcs A2
+027f : c9a0                     cmp #$A0
+0281 : 9003                     bcc A3
+0283 : 695f             A2      adc #$5F  ; add $60 (carry is set)
+0285 : 38                       sec
+0286 : 8506             A3      sta AR    ; predicted accumulator result
+0288 : 08                       php
+0289 : 68                       pla
+028a : 850a                     sta CF    ; predicted carry result
+028c : 68                       pla
                         ;
                         ; note that all 8 bits of the P register are stored in VF
                         ;
-028b : 8508                     sta VF    ; predicted V flags
-028d : 60                       rts
+028d : 8508                     sta VF    ; predicted V flags
+028f : 60                       rts
                         
                         ; Calculate the actual decimal mode accumulator and flags, and the
                         ; accumulator and flag results when N2 is subtracted from N1 using binary
                         ; arithmetic
                         ;
-028e : f8               SUB     sed       ; decimal mode
-028f : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
-0291 : a500                     lda N1
-0293 : e501                     sbc N2
-0295 : 8504                     sta DA    ; actual accumulator result in decimal mode
-0297 : 08                       php
-0298 : 68                       pla
-0299 : 8505                     sta DNVZC ; actual flags result in decimal mode
-029b : d8                       cld       ; binary mode
-029c : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
-029e : a500                     lda N1
-02a0 : e501                     sbc N2
-02a2 : 8502                     sta HA    ; accumulator result of N1-N2 using binary arithmetic
+0290 : f8               SUB     sed       ; decimal mode
+0291 : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+0293 : a500                     lda N1
+0295 : e501                     sbc N2
+0297 : 8504                     sta DA    ; actual accumulator result in decimal mode
+0299 : 08                       php
+029a : 68                       pla
+029b : 8505                     sta DNVZC ; actual flags result in decimal mode
+029d : d8                       cld       ; binary mode
+029e : c001                     cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+02a0 : a500                     lda N1
+02a2 : e501                     sbc N2
+02a4 : 8502                     sta HA    ; accumulator result of N1-N2 using binary arithmetic
                         
-02a4 : 08                       php
-02a5 : 68                       pla
-02a6 : 8503                     sta HNVZC ; flags result of N1-N2 using binary arithmetic
-02a8 : 60                       rts
+02a6 : 08                       php
+02a7 : 68                       pla
+02a8 : 8503                     sta HNVZC ; flags result of N1-N2 using binary arithmetic
+02aa : 60                       rts
                         
                                 if cputype != 1
                         ; Calculate the predicted SBC accumulator result for the 6502 and 65816
@@ -231,27 +231,27 @@ AS65 Assembler for R6502 [1.42].  Copyright 1994-2007, Frank A. Kingswood       
                                 if cputype = 1
                         ; Calculate the predicted SBC accumulator result for the 6502 and 65C02
                         ;
-02a9 : c001             SUB2        cpy #1    ; set carry if Y = 1, clear carry if Y = 0
-02ab : a50c                         lda N1L
-02ad : e50e                         sbc N2L
-02af : a200                         ldx #0
-02b1 : b004                         bcs S21
-02b3 : e8                           inx
-02b4 : 290f                         and #$0F
-02b6 : 18                           clc
-02b7 : 050d             S21         ora N1H
+02ab : c001             SUB2        cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+02ad : a50c                         lda N1L
+02af : e50e                         sbc N2L
+02b1 : a200                         ldx #0
+02b3 : b004                         bcs S21
+02b5 : e8                           inx
+02b6 : 290f                         and #$0F
+02b8 : 18                           clc
+02b9 : 050d             S21         ora N1H
                         ;
                         ; if N1L - N2L >= 0, then subtract N2 & $F0
                         ; if N1L - N2L <  0, then subtract (N2 & $F0) + $0F + 1 (carry is clear)
                         ;
-02b9 : f50f                         sbc N2H,x
-02bb : b002                         bcs S22
-02bd : e95f                         sbc #$5F   ; subtract $60 (carry is clear)
-02bf : e000             S22         cpx #0
-02c1 : f002                         beq S23
-02c3 : e906                         sbc #6
-02c5 : 8506             S23         sta AR     ; predicted accumulator result
-02c7 : 60                           rts
+02bb : f50f                         sbc N2H,x
+02bd : b002                         bcs S22
+02bf : e95f                         sbc #$5F   ; subtract $60 (carry is clear)
+02c1 : e000             S22         cpx #0
+02c3 : f002                         beq S23
+02c5 : e906                         sbc #6
+02c7 : 8506             S23         sta AR     ; predicted accumulator result
+02c9 : 60                           rts
                                 endif
                         
                         ; Compare accumulator actual results to predicted results
@@ -260,36 +260,36 @@ AS65 Assembler for R6502 [1.42].  Copyright 1994-2007, Frank A. Kingswood       
                         ;   Z flag = 1 (BEQ branch) if same
                         ;   Z flag = 0 (BNE branch) if different
                         ;
-02c8 :                  COMPARE
+02ca :                  COMPARE
                                 if chk_a = 1
-02c8 : a504                         lda DA
-02ca : c506                         cmp AR
-02cc : d01e                         bne C1
+02ca : a504                         lda DA
+02cc : c506                         cmp AR
+02ce : d01e                         bne C1
                                 endif
                                 if chk_n = 1
-02ce : a505                         lda DNVZC ; [7] see text
-02d0 : 4507                         eor NF
-02d2 : 2980                         and #$80  ; mask off N flag
-02d4 : d016                         bne C1
+02d0 : a505                         lda DNVZC ; [7] see text
+02d2 : 4507                         eor NF
+02d4 : 2980                         and #$80  ; mask off N flag
+02d6 : d016                         bne C1
                                 endif
                                 if chk_v = 1
-02d6 : a505                         lda DNVZC ; [8] see text
-02d8 : 4508                         eor VF
-02da : 2940                         and #$40  ; mask off V flag
-02dc : d00e                         bne C1    ; [9] see text
+02d8 : a505                         lda DNVZC ; [8] see text
+02da : 4508                         eor VF
+02dc : 2940                         and #$40  ; mask off V flag
+02de : d00e                         bne C1    ; [9] see text
                                 endif
                                 if chk_z = 1
-02de : a505                         lda DNVZC
-02e0 : 4509                         eor ZF    ; mask off Z flag
-02e2 : 2902                         and #2
-02e4 : d006                         bne C1    ; [10] see text
+02e0 : a505                         lda DNVZC
+02e2 : 4509                         eor ZF    ; mask off Z flag
+02e4 : 2902                         and #2
+02e6 : d006                         bne C1    ; [10] see text
                                 endif
                                 if chk_c = 1
-02e6 : a505                         lda DNVZC
-02e8 : 450a                         eor CF
-02ea : 2901                         and #1    ; mask off C flag
+02e8 : a505                         lda DNVZC
+02ea : 450a                         eor CF
+02ec : 2901                         and #1    ; mask off C flag
                                 endif
-02ec : 60               C1      rts
+02ee : 60               C1      rts
                         
                         ; These routines store the predicted values for ADC and SBC for the 6502,
                         ; 65C02, and 65816 in AR, CF, NF, VF, and ZF
@@ -317,23 +317,23 @@ AS65 Assembler for R6502 [1.42].  Copyright 1994-2007, Frank A. Kingswood       
                                 endif
                                 if  cputype = 1
                         
-02ed : a506             A6502       lda AR      ; 65C02
-02ef : 08                           php
-02f0 : 68                           pla
-02f1 : 8507                         sta NF
-02f3 : 8509                         sta ZF
-02f5 : 60                           rts
+02ef : a506             A6502       lda AR      ; 65C02
+02f1 : 08                           php
+02f2 : 68                           pla
+02f3 : 8507                         sta NF
+02f5 : 8509                         sta ZF
+02f7 : 60                           rts
                         
-02f6 : 20a902           S6502       jsr SUB2
-02f9 : a506                         lda AR
-02fb : 08                           php
-02fc : 68                           pla
-02fd : 8507                         sta NF
-02ff : 8509                         sta ZF
-0301 : a503                         lda HNVZC
-0303 : 8508                         sta VF
-0305 : 850a                         sta CF
-0307 : 60                           rts
+02f8 : 20ab02           S6502       jsr SUB2
+02fb : a506                         lda AR
+02fd : 08                           php
+02fe : 68                           pla
+02ff : 8507                         sta NF
+0301 : 8509                         sta ZF
+0303 : a503                         lda HNVZC
+0305 : 8508                         sta VF
+0307 : 850a                         sta CF
+0309 : 60                           rts
                         
                                 endif
                                 if  cputype = 2
@@ -358,10 +358,10 @@ AS65 Assembler for R6502 [1.42].  Copyright 1994-2007, Frank A. Kingswood       
                         
                                 endif
                         
-02f6 =                          end TEST
+02f8 =                          end TEST
                         
 No errors in pass 2.
-Wrote binary from address $0200 through $0307.
-Total size 264 bytes.
+Wrote binary from address $0200 through $0309.
+Total size 266 bytes.
 Program start address is at $0200 (512).
 
