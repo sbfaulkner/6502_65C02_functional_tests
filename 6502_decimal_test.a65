@@ -108,7 +108,7 @@ LOOP2   lda N1    ; N1L = N1 & $0F
         jsr SUB
         jsr S6502
         jsr COMPARE
-        bne DONE
+        bne SUBFAIL
 NEXT1   inc N1    ; [5] see text
         bne LOOP2 ; loop through all 256 values of N1
 NEXT2   inc N2    ; [6] see text
@@ -119,6 +119,9 @@ NEXT2   inc N2    ; [6] see text
         sta ERROR
 DONE
         end_of_test
+SUBFAIL lda #2
+        sta ERROR
+        jmp DONE
 
 ; Calculate the actual decimal mode accumulator and flags, the accumulator
 ; and flag results when N1 is added to N2 using binary arithmetic, the
